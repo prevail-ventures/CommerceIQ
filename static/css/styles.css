@@ -25,6 +25,7 @@ header nav a {
 }
 
 main {
+  margin-bottom: 50px; /* Add space at the bottom to account for the footer */
   padding: 20px;
 }
 
@@ -41,15 +42,68 @@ table th, table td {
 }
 
 table th {
-  background-color: #f4f4f4;
+  background-color: #f2f2f2;
 }
 
-footer {
+footer {    
+  text-align: center;  
   background-color: #333;
   color: white;
   text-align: center;
   padding: 10px 0;
-  position: fixed;
+  position: relative;
   bottom: 0;
   width: 100%;
+}
+
+/* Styling for Shipping Differential */
+.shipping-differential-positive {
+  color: green;
+}
+
+.shipping-differential-negative {
+  color: red;
+}
+
+.shipping-differential-neutral {
+  color: black;
+}
+
+/* Sales Analytics */
+.sales-analytics {
+  margin-bottom: 20px;
+}
+
+/* Shipping Analytics */
+.shipping-analytics {
+  margin-bottom: 20px;
+}
+
+.shipping-differential-positive {
+  color: green;
+}
+
+.shipping-differential-negative {
+  color: red;
+}
+
+.shipping-differential-neutral {
+  color: black;
+}
+
+/* Orders To Investigate */
+.orders-to-investigate {
+  margin-top: 10px;
+}
+
+.order-row-positive {
+  background-color: lightgreen;
+}
+
+.order-row-negative {
+  background-color: lightcoral;
+}
+
+.filtered-orders {
+  overflow-x: auto; /* Enable horizontal scrolling */
 }

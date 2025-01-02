@@ -1,25 +1,42 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<h2>Order Details</h2>
+<h2>Order Details: {{ order["order_id"] }}</h2>
 
 <section>
     <h3>Order Summary</h3>
-    <p><strong>Order ID:</strong> {{ order.order_id }}</p>
-    <p><strong>Order Total:</strong> ${{ order.order_total }}</p>
-    <p><strong>Total Estimated Shipping Cost:</strong> ${{ order.total_estimated_shipping_cost }}</p>
-    <p><strong>Actual Shipping Cost:</strong> ${{ order.actual_shipping_cost }}</p>
+    <p><strong>Order Date:</strong> {{ order["order_date"] }}</p>
+    <p><strong>Order Subtotal:</strong> ${{ order_subtotal }}</p>
+    <p><strong>Actual Shipping Cost:</strong> ${{ order["actual_shipping_cost"] }}</p>
+    <p><strong>Order Total:</strong> ${{ order["order_total"] }}</p>
+</section>
+
+<section>
+    <h3>Shipping Analysis</h3>
+    <p><strong>Total Estimated Shipping Cost:</strong> ${{ total_estimated_shipping_cost }}</p>
+    <p><strong>Actual Shipping Cost:</strong> ${{ order["actual_shipping_cost"] }}</p>
+    <p>
+        <strong>Shipping Differential:</strong>
+        <span class="
+            {% if shipping_differential > 0 %}shipping-differential-positive
+            {% elif shipping_differential < 0 %}shipping-differential-negative
+            {% else %}shipping-differential-neutral
+            {% endif %}
+        ">
+            ${{ shipping_differential }}
+        </span>
+    </p>
+    <p><strong>Suggested Action:</strong> Coming soon...</p>
 </section>
 
 <section>
     <h3>Line Items</h3>
-    <table>
+    <table border="1">
         <thead>
             <tr>
                 <th>SKU</th>
-                <th>Product Name</th>
                 <th>Quantity</th>
-                <th>Price</th>
+                <th>List Price</th>
                 <th>Subtotal</th>
                 <th>Estimated Shipping Subtotal</th>
                 <th>Supplier</th>
@@ -27,15 +44,14 @@
         </thead>
         <tbody>
             {% for item in line_items %}
-            <tr>
-                <td><a href="/products/{{ item.sku }}">{{ item.sku }}</a></td>
-                <td>{{ item.name }}</td>
-                <td>{{ item.quantity }}</td>
-                <td>${{ item.price }}</td>
-                <td>${{ item.subtotal }}</td>
-                <td>${{ item.subtotal_estimated_shipping_cost }}</td>
-                <td>{{ item.supplier }}</td>
-            </tr>
+                <tr>
+                    <td><a href="/products/{{ item['sku'] }}">{{ item["sku"] }}</a></td>
+                    <td>{{ item["quantity"] }}</td>
+                    <td>${{ item["list_price"] }}</td>
+                    <td>${{ item["subtotal"] }}</td>
+                    <td>${{ item["estimated_shipping_subtotal"] }}</td>
+                    <td>{{ item["supplier"] }}</td>
+                </tr>
             {% endfor %}
         </tbody>
     </table>

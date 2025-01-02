@@ -3,10 +3,62 @@
 {% block content %}
 <h2>Dashboard</h2>
 
-<section>
-    <h3>Shipping Analytics</h3>
-    <p><strong>Aggregate Shipping Difference:</strong> {{ aggregate_difference }}%</p>
+<section class="sales-analytics">
+    <h3>Sales Analytics</h3>
+    <p><strong>Total Revenue:</strong> ${{ total_revenue }}</p>
+    <h4>Revenue by Supplier</h4>
+    <ul>
+        {% for supplier, revenue in revenue_by_supplier.items() %}
+            <li><strong>{{ supplier }}:</strong> ${{ revenue }}</li>
+        {% endfor %}
+    </ul>
 </section>
+
+<section class="shipping-analytics">
+    <h3>Shipping Analytics</h3>
+    <p><strong>Total Estimated Shipping Cost:</strong> ${{ total_estimated_shipping }}</p>
+    <p><strong>Total Actual Shipping Cost:</strong> ${{ total_actual_shipping }}</p>
+    <p>
+        <strong>Aggregate Shipping Differential:</strong>
+        <span class="
+            {% if aggregate_shipping_differential > 0 %}shipping-differential-positive
+            {% elif aggregate_shipping_differential < 0 %}shipping-differential-negative
+            {% else %}shipping-differential-neutral
+            {% endif %}
+        ">
+            ${{ aggregate_shipping_differential }}
+        </span>
+    </p>
+    <h4>Orders To Investigate</h4>
+    <table border="1" class="orders-to-investigate">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Order Total</th>
+                <th>Actual Shipping Cost</th>
+                <th>Total Estimated Shipping</th>
+                <th>Order Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders_to_investigate %}
+                <tr class="
+                    {% if order["shipping_difference"] > 1 %}order-row-positive
+                    {% elif order["shipping_difference"] < -1 %}order-row-negative
+                    {% endif %}
+                ">
+                    <td><a href="/orders/{{ order['order_id'] }}">{{ order["order_id"] }}</a></td>
+                    <td>${{ order["order_total"] }}</td>
+                    <td>${{ order["actual_shipping_cost"] }}</td>
+                    <td>${{ order["total_estimated_shipping_cost"] }}</td>
+                    <td>{{ order["order_date"] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<hr>
 
 <form method="POST" action="/">
     <label for="date_filter">Filter by Date Range:</label>
@@ -31,32 +83,35 @@
 </form>
 
 <h3>Filtered Orders</h3>
-<table border="1">
-    <thead>
-        <tr>
-            <th>Order ID</th>
-            <th>Order Total</th>
-            <th>Actual Shipping Cost</th>
-            <th>Total Estimated Shipping</th>
-            <th>Order Date</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% if orders %}
-            {% for order in orders %}
-                <tr>
-                    <td>{{ order["order_id"] }}</td>
-                    <td>${{ order["order_total"] }}</td>
-                    <td>${{ order["actual_shipping_cost"] }}</td>
-                    <td>${{ order["total_estimated_shipping_cost"] }}</td>
-                    <td>{{ order["order_date"] }}</td>
-                </tr>
-            {% endfor %}
-        {% else %}
+<div class="filtered-orders">
+    <table border="1">
+        <thead>
             <tr>
-                <td colspan="5">No orders match the selected filters.</td>
+                <th>Order ID</th>
+                <th>Order Total</th>
+                <th>Actual Shipping Cost</th>
+                <th>Total Estimated Shipping</th>
+                <th>Order Date</th>
             </tr>
-        {% endif %}
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            {% if orders %}
+                {% for order in orders %}
+                    <tr>
+                        <td><a href="/orders/{{ order['order_id'] }}">{{ order["order_id"] }}</a></td>
+                        <td>${{ order["order_total"] }}</td>
+                        <td>${{ order["actual_shipping_cost"] }}</td>
+                        <td>${{ order["total_estimated_shipping_cost"] }}</td>
+                        <td>{{ order["order_date"] }}</td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="5">No orders match the selected filters.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
 {% endblock %}
