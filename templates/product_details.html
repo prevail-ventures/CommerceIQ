@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h2>Product Details</h2>
+<section>
+    <p><strong>SKU:</strong> {{ product.sku }}</p>
+    <p><strong>Name:</strong> {{ product.name }}</p>
+    <p><strong>Cost:</strong> ${{ product.cost }}</p>
+    <p><strong>Listed Price:</strong> ${{ product.listed_price }}</p>
+    <p><strong>Inventory Level:</strong> {{ product.inventory_level }}</p>
+    <p><strong>Estimated Shipping Cost:</strong> ${{ product.estimated_shipping_cost }}</p>
+</section>
+
+<a href="javascript:history.back()">Back to Previous Page</a>
+{% endblock %}

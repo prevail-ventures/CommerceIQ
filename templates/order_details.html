@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h2>Order Details</h2>
+
+<section>
+    <h3>Order Summary</h3>
+    <p><strong>Order ID:</strong> {{ order.order_id }}</p>
+    <p><strong>Order Total:</strong> ${{ order.order_total }}</p>
+    <p><strong>Total Estimated Shipping Cost:</strong> ${{ order.total_estimated_shipping_cost }}</p>
+    <p><strong>Actual Shipping Cost:</strong> ${{ order.actual_shipping_cost }}</p>
+</section>
+
+<section>
+    <h3>Line Items</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>SKU</th>
+                <th>Product Name</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Subtotal</th>
+                <th>Estimated Shipping Subtotal</th>
+                <th>Supplier</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in line_items %}
+            <tr>
+                <td><a href="/products/{{ item.sku }}">{{ item.sku }}</a></td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>${{ item.price }}</td>
+                <td>${{ item.subtotal }}</td>
+                <td>${{ item.subtotal_estimated_shipping_cost }}</td>
+                <td>{{ item.supplier }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<a href="/">Back to Orders</a>
+{% endblock %}
