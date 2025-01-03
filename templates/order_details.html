@@ -26,8 +26,32 @@
             ${{ shipping_differential }}
         </span>
     </p>
-    <p><strong>Suggested Action:</strong> Coming soon...</p>
 </section>
+
+<section>
+    <h3>Suggested Actions</h3>
+    {% if suggestions %}
+        <ul>
+            {% for suggestion in suggestions %}
+                <li class="
+                    {% if suggestion.confidence_color == 'red' %}confidence-low
+                    {% elif suggestion.confidence_color == 'yellow' %}confidence-medium
+                    {% elif suggestion.confidence_color == 'green' %}confidence-high
+                    {% endif %}
+                ">
+                    CommerceIQ suggests changing the estimated shipping cost for {{ suggestion.product_name }}
+                    from ${{ suggestion.current_estimated_shipping }} to ${{ suggestion.suggested_estimated_shipping }}.
+                    <span title="Based on {{ suggestion.num_orders }} orders from the past 6 months.">
+                        ⓘ
+                    </span>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No suggestions available for this order.</p>
+    {% endif %}
+</section>
+
 
 <section>
     <h3>Line Items</h3>

@@ -46,7 +46,10 @@ def dashboard():
 
     # Combine filters and execute query for orders
     filtered_query = f"""
-    SELECT DISTINCT o.order_id, o.order_total, o.actual_shipping_cost, o.total_estimated_shipping_cost, o.order_date
+    SELECT DISTINCT o.order_id, o.order_total, o.actual_order_total, 
+        o.actual_shipping_cost, o.total_estimated_shipping_cost, 
+        o.projected_shipping_company, o.projected_shipping_method, 
+        o.actual_shipping_method, o.shipping_address_state, o.order_date
     FROM orders o
     JOIN line_items li ON o.order_id = li.order_id
     WHERE {date_condition} AND {supplier_condition}
@@ -57,9 +60,9 @@ def dashboard():
     # Sales Analytics
     sales_query = f"""
     SELECT 
+        li.supplier AS supplier_name,
         SUM(o.order_total) AS total_revenue,
-        li.supplier,
-        SUM(o.order_total) AS revenue_by_supplier
+        SUM(o.actual_order_total) AS actual_totals
     FROM orders o
     JOIN line_items li ON o.order_id = li.order_id
     WHERE {date_condition} AND {supplier_condition}
@@ -67,10 +70,26 @@ def dashboard():
     """
     cursor.execute(sales_query)
     sales_data = cursor.fetchall()
-    total_revenue = sum(item["revenue_by_supplier"] for item in sales_data)
-    revenue_by_supplier = {
-        item["supplier"]: item["revenue_by_supplier"] for item in sales_data
-    }
+
+    # Aggregate sales data
+    revenue_by_supplier = []
+    total_revenue = 0
+    for item in sales_data:
+        supplier_name = item["supplier_name"]
+        total_revenue += item["total_revenue"]
+        margin = (
+            ((item["total_revenue"] - item["actual_totals"]) / item["total_revenue"])
+            * 100
+            if item["total_revenue"] > 0
+            else 0
+        )
+        revenue_by_supplier.append(
+            {
+                "supplier_name": supplier_name,
+                "total_revenue": item["total_revenue"],
+                "margin": round(margin, 2),
+            }
+        )
 
     # Shipping Analytics
     shipping_query = f"""
@@ -89,8 +108,11 @@ def dashboard():
 
     # Orders To Investigate
     orders_to_investigate_query = f"""
-    SELECT DISTINCT o.order_id, o.order_total, o.actual_shipping_cost, o.total_estimated_shipping_cost, o.order_date,
-    (o.total_estimated_shipping_cost - o.actual_shipping_cost) AS shipping_difference
+    SELECT DISTINCT o.order_id, o.order_total, o.actual_order_total, 
+        o.total_estimated_shipping_cost, o.actual_shipping_cost, 
+        o.projected_shipping_company, o.projected_shipping_method, 
+        o.actual_shipping_method, o.shipping_address_state, o.order_date,
+        (o.total_estimated_shipping_cost - o.actual_shipping_cost) AS shipping_difference
     FROM orders o
     JOIN line_items li ON o.order_id = li.order_id
     WHERE {date_condition} AND {supplier_condition}
@@ -136,7 +158,7 @@ def order_details(order_id):
     )
     order = cursor.fetchone()
 
-    # Fetch line items with calculated estimated shipping subtotals
+    # Fetch line items
     cursor.execute(
         """
     SELECT 
@@ -145,7 +167,9 @@ def order_details(order_id):
         li.price AS list_price, 
         li.subtotal, 
         (p.estimated_shipping_cost * li.quantity) AS estimated_shipping_subtotal,
-        li.supplier
+        li.supplier,
+        p.name,
+        p.estimated_shipping_cost
     FROM line_items li
     JOIN products p ON li.sku = p.sku
     WHERE li.order_id = %s
@@ -154,7 +178,7 @@ def order_details(order_id):
     )
     line_items = cursor.fetchall()
 
-    # Calculate order subtotal (sum of all line item subtotals)
+    # Calculate order subtotal
     order_subtotal = sum(item["subtotal"] for item in line_items)
 
     # Calculate total estimated shipping cost
@@ -167,6 +191,54 @@ def order_details(order_id):
         total_estimated_shipping_cost - order["actual_shipping_cost"]
     )
 
+    # Fetch suggested actions for each product
+    suggestions = []
+    for item in line_items:
+        sku = item["sku"]
+        product_name = item["name"]
+        current_estimated_shipping = item["estimated_shipping_cost"]
+
+        # Fetch past orders for this product (last 6 months)
+        cursor.execute(
+            """
+        SELECT actual_shipping_cost
+        FROM orders o
+        JOIN line_items li ON o.order_id = li.order_id
+        WHERE li.sku = %s AND o.order_date >= DATE(NOW() - INTERVAL 6 MONTH)
+        """,
+            (sku,),
+        )
+        past_shipping_costs = [row["actual_shipping_cost"] for row in cursor.fetchall()]
+        num_orders = len(past_shipping_costs)
+
+        if num_orders > 0:
+            # Calculate suggested estimated shipping cost
+            average_actual_shipping = sum(past_shipping_costs) / num_orders
+            suggested_estimated_shipping = max(
+                average_actual_shipping, 0.01
+            )  # Buffer to stay positive
+
+            # Determine confidence color
+            if num_orders <= 3:
+                confidence_color = "red"
+            elif 4 <= num_orders <= 10:
+                confidence_color = "yellow"
+            else:
+                confidence_color = "green"
+
+            # Add suggestion
+            suggestions.append(
+                {
+                    "product_name": product_name,
+                    "current_estimated_shipping": current_estimated_shipping,
+                    "suggested_estimated_shipping": round(
+                        suggested_estimated_shipping, 2
+                    ),
+                    "num_orders": num_orders,
+                    "confidence_color": confidence_color,
+                }
+            )
+
     conn.close()
 
     return render_template(
@@ -176,6 +248,7 @@ def order_details(order_id):
         order_subtotal=order_subtotal,
         total_estimated_shipping_cost=total_estimated_shipping_cost,
         shipping_differential=shipping_differential,
+        suggestions=suggestions,
     )
 
 

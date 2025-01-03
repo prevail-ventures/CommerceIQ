@@ -5,14 +5,28 @@
 
 <section class="sales-analytics">
     <h3>Sales Analytics</h3>
-    <p><strong>Total Revenue:</strong> ${{ total_revenue }}</p>
-    <h4>Revenue by Supplier</h4>
-    <ul>
-        {% for supplier, revenue in revenue_by_supplier.items() %}
-            <li><strong>{{ supplier }}:</strong> ${{ revenue }}</li>
-        {% endfor %}
-    </ul>
+    <table>
+        <thead>
+            <tr>
+                <th>Supplier Name</th>
+                <th>Total Revenue</th>
+                <th>Margin</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for supplier in revenue_by_supplier %}
+                <tr>
+                    <td>{{ supplier.supplier_name }}</td>
+                    <td>${{ supplier.total_revenue }}</td>
+                    <td class="{% if supplier.margin >= 12 %}confidence-high{% else %}confidence-low{% endif %}">
+                        {{ supplier.margin | round(2) }}%
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </section>
+
 
 <section class="shipping-analytics">
     <h3>Shipping Analytics</h3>
@@ -30,32 +44,43 @@
         </span>
     </p>
     <h4>Orders To Investigate</h4>
-    <table border="1" class="orders-to-investigate">
-        <thead>
-            <tr>
-                <th>Order ID</th>
-                <th>Order Total</th>
-                <th>Actual Shipping Cost</th>
-                <th>Total Estimated Shipping</th>
-                <th>Order Date</th>
+<table border="1" class="orders-to-investigate">
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Order Total</th>
+            <th>Actual Order Total</th>
+            <th>Total Estimated Shipping Cost</th>
+            <th>Actual Shipping Cost</th>
+            <th>Projected Shipping Company</th>
+            <th>Projected Shipping Method</th>
+            <th>Actual Shipping Method</th>
+            <th>Shipping Address State</th>
+            <th>Order Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in orders_to_investigate %}
+            <tr class="
+                {% if order["shipping_difference"] > 1 %}order-row-positive
+                {% elif order["shipping_difference"] < -1 %}order-row-negative
+                {% endif %}
+            ">
+                <td><a href="/orders/{{ order['order_id'] }}">{{ order["order_id"] }}</a></td>
+                <td>${{ order["order_total"] }}</td>
+                <td>${{ order["actual_order_total"] }}</td>
+                <td>${{ order["total_estimated_shipping_cost"] }}</td>
+                <td>${{ order["actual_shipping_cost"] }}</td>
+                <td>{{ order["projected_shipping_company"] }}</td>
+                <td>{{ order["projected_shipping_method"] }}</td>
+                <td>{{ order["actual_shipping_method"] }}</td>
+                <td>{{ order["shipping_address_state"] }}</td>
+                <td>{{ order["order_date"] }}</td>
             </tr>
-        </thead>
-        <tbody>
-            {% for order in orders_to_investigate %}
-                <tr class="
-                    {% if order["shipping_difference"] > 1 %}order-row-positive
-                    {% elif order["shipping_difference"] < -1 %}order-row-negative
-                    {% endif %}
-                ">
-                    <td><a href="/orders/{{ order['order_id'] }}">{{ order["order_id"] }}</a></td>
-                    <td>${{ order["order_total"] }}</td>
-                    <td>${{ order["actual_shipping_cost"] }}</td>
-                    <td>${{ order["total_estimated_shipping_cost"] }}</td>
-                    <td>{{ order["order_date"] }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        {% endfor %}
+    </tbody>
+</table>
+
 </section>
 
 <hr>
@@ -89,8 +114,13 @@
             <tr>
                 <th>Order ID</th>
                 <th>Order Total</th>
+                <th>Actual Order Total</th>
+                <th>Total Estimated Shipping Cost</th>
                 <th>Actual Shipping Cost</th>
-                <th>Total Estimated Shipping</th>
+                <th>Projected Shipping Company</th>
+                <th>Projected Shipping Method</th>
+                <th>Actual Shipping Method</th>
+                <th>Shipping Address State</th>
                 <th>Order Date</th>
             </tr>
         </thead>
@@ -100,18 +130,24 @@
                     <tr>
                         <td><a href="/orders/{{ order['order_id'] }}">{{ order["order_id"] }}</a></td>
                         <td>${{ order["order_total"] }}</td>
-                        <td>${{ order["actual_shipping_cost"] }}</td>
+                        <td>${{ order["actual_order_total"] }}</td>
                         <td>${{ order["total_estimated_shipping_cost"] }}</td>
+                        <td>${{ order["actual_shipping_cost"] }}</td>
+                        <td>{{ order["projected_shipping_company"] }}</td>
+                        <td>{{ order["projected_shipping_method"] }}</td>
+                        <td>{{ order["actual_shipping_method"] }}</td>
+                        <td>{{ order["shipping_address_state"] }}</td>
                         <td>{{ order["order_date"] }}</td>
                     </tr>
                 {% endfor %}
             {% else %}
                 <tr>
-                    <td colspan="5">No orders match the selected filters.</td>
+                    <td colspan="10">No orders match the selected filters.</td>
                 </tr>
             {% endif %}
         </tbody>
     </table>
 </div>
+
 
 {% endblock %}
