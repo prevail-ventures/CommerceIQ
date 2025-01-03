@@ -15,6 +15,9 @@ CommerceIQ is a modular application designed to streamline the management and an
 - Store processed data in an SQL database (e.g., MySQL).
 - Organized tables for products, orders, line items, and analytics metrics.
 - Designed for extensibility to include new data points as needed.
+- Store processed data in an SQL database (e.g., MySQL).
+- Organized tables for products, orders, line items, and analytics metrics.
+- Designed for extensibility to include new data points as needed.
 
 ### Analysis
 
@@ -28,11 +31,19 @@ CommerceIQ is a modular application designed to streamline the management and an
 - Intuitive dashboard with:
   - **Sales Analytics**: Total revenue, revenue by supplier.
   - **Shipping Analytics**: Total estimated shipping cost, total actual shipping cost, aggregate shipping differential, and flagged orders for investigation.
+- Intuitive dashboard with:
+  - **Sales Analytics**: Total revenue, revenue by supplier.
+  - **Shipping Analytics**: Total estimated shipping cost, total actual shipping cost, aggregate shipping differential, and flagged orders for investigation.
 - Exportable data for reports in CSV or PDF formats.
 - Backend built with Python (Flask) and a responsive HTML/CSS frontend.
 
 ## Tech Stack
 
+- **Backend**: Python (Flask).
+- **Frontend**: HTML, CSS.
+- **Database**: MySQL hosted on AWS RDS.
+- **Hosting**: AWS EC2 for the app, S3 for static assets.
+- **Scheduling**: AWS Lambda or cron jobs.
 - **Backend**: Python (Flask).
 - **Frontend**: HTML, CSS.
 - **Database**: MySQL hosted on AWS RDS.
@@ -88,16 +99,26 @@ CommerceIQ is a modular application designed to streamline the management and an
 
    ```bash
    python populate_data.py
+   python db_setup.py
    ```
 
 8. Run the application locally:
+9. Populate test data:
+
    ```bash
-   python app.py
+   python populate_data.py
    ```
-   Access the app at `http://127.0.0.1:5000/`.
+
+10. Run the application locally:
+    ```bash
+    python app.py
+    ```
+    Access the app at `http://127.0.0.1:5000/`.
 
 ## Usage
 
+- Use the dashboard to view metrics, apply filters, and access detailed order and product information.
+- Set up API connections and data collection schedules through backend scripts.
 - Use the dashboard to view metrics, apply filters, and access detailed order and product information.
 - Set up API connections and data collection schedules through backend scripts.
 - Export reports for further analysis or board presentations.
@@ -127,6 +148,9 @@ This project is licensed under the MIT License. See the LICENSE file for details
 
 For questions or support, please contact:
 
+- **Name**: Austin Graham
+- **Email**: austin.graham86@gmail.com
+- **GitHub**: [austinlgraham](https://github.com/austinlgraham)
 - **Name**: Austin Graham
 - **Email**: austin.graham86@gmail.com
 - **GitHub**: [austinlgraham](https://github.com/austinlgraham)
